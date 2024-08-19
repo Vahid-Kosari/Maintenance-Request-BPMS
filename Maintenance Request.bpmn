@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0x2shxi" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.12.1" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
   <bpmn:collaboration id="Collaboration_0hbol3d">
-    <bpmn:participant id="Participant_0l84de2" name="فرآیند TSR" processRef="tsrProcess" />
+    <bpmn:participant id="Participant_0l84de2" name="فرآیند Maintenance" processRef="tsrProcess" />
   </bpmn:collaboration>
-  <bpmn:process id="tsrProcess" name="فرآیند TSR" isExecutable="true">
+  <bpmn:process id="tsrProcess" name="فرآیند Maintenance" isExecutable="true">
     <bpmn:laneSet id="LaneSet_1sglyzl">
       <bpmn:lane id="Lane_18egfit" name="برنامه ریزی تعمیرات">
         <bpmn:flowNodeRef>Activity_09n04gs</bpmn:flowNodeRef>
@@ -31,8 +31,16 @@
         <bpmn:flowNodeRef>Gateway_00txb9g</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_05k4sx7</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0zpxxuu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1nmk0tu</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_117uf4g</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1jytfch</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1kmhgnj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1gwcctk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1g0oh2b</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1xray2b</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1mqde4m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1dgy8j9</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1jia0lo</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_1ja24ae_inspection" name="بازرسی فنی">
         <bpmn:flowNodeRef>Gateway_0i1kuth</bpmn:flowNodeRef>
@@ -62,18 +70,6 @@
         <bpmn:flowNodeRef>Gateway_152u3m1</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1c4i2aj</bpmn:flowNodeRef>
         <bpmn:childLaneSet id="LaneSet_0v48u4h" />
-      </bpmn:lane>
-      <bpmn:lane id="Lane_13uu65h_ePlanning" name="برنامه ریزی مهندسی">
-        <bpmn:flowNodeRef>Activity_1kmhgnj</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1gwcctk</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1g0oh2b</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_1xray2b</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1mqde4m</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gateway_1nmk0tu</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_002z6fl</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1mwmk3r</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gateway_1dgy8j9</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_1jia0lo</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_1vc30f1" name="بهره برداری&#10;">
         <bpmn:flowNodeRef>Gateway_1yfneli</bpmn:flowNodeRef>
@@ -557,177 +553,6 @@ execution.setVariable("m", org.camunda.spin.Spin.JSON(x));
       <bpmn:incoming>Flow_1oce1r7</bpmn:incoming>
       <bpmn:outgoing>Flow_03p9o0f</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="Activity_1kmhgnj" name="بررسی نواقص مدارک مکانیک" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultM.json&#38;var=requestData" camunda:assignee="${starter}">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-var docDefectPMM = x.data.processData.docDefectPMM;
-var textTemplatePM = x.data.processData.textTemplatePM;
-
-//Retrieve the assignee query of the currnet task instance
-var query = task
-  .getProcessEngineServices()
-  .getIdentityService()
-  .createUserQuery()
-  .userIdIn(task.assignee);
-
-//Retrieve the only member of the array object
-var users = [];
-users = query.list();
-var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
-
-// Get the task ID
-var taskId = task.execution.getVariable("taskId");
-
-//Retrieve the time query of the currnet task instance
-var timeQuery = task
-.getProcessEngineServices()
-.getHistoryService()
-.createHistoricTaskInstanceQuery()
-.taskId(taskId);
-
-//Retrieve the only member of the array object
-var times = [];
-times = timeQuery.list();
-var endTime = times.get(0).getEndTime();
-
-if (docDefectPMM == ""){
-    if (textTemplatePM != "") {
-        docDefectPMM = userFullName + ": " + textTemplatePM + " in: " + endTime;
-        } else {
-        docDefectPMM = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-        }
-    } else {
-    if (textTemplatePM != "") {
-    docDefectPMM = docDefectPMM + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
-    } else {
-    docDefectPMM = docDefectPMM + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-    }
-}
-
-x.data.processData.docDefectPMM = docDefectPMM;
-x.data.processData.textTemplatePM = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0eacik5</bpmn:incoming>
-      <bpmn:outgoing>Flow_0w9h8sh</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:userTask id="Activity_1gwcctk" name="بررسی نواقص مدارک جوش" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultW.json&#38;var=requestData" camunda:assignee="${starter}">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-var docDefectPMW = x.data.processData.docDefectPMW;
-var textTemplatePM = x.data.processData.textTemplatePM;
-
-//Retrieve the assignee query of the currnet task instance
-var query = task
-  .getProcessEngineServices()
-  .getIdentityService()
-  .createUserQuery()
-  .userIdIn(task.assignee);
-
-//Retrieve the only member of the array object
-var users = [];
-users = query.list();
-var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
-
-// Get the task ID
-var taskId = task.execution.getVariable("taskId");
-
-//Retrieve the time query of the currnet task instance
-var timeQuery = task
-.getProcessEngineServices()
-.getHistoryService()
-.createHistoricTaskInstanceQuery()
-.taskId(taskId);
-
-//Retrieve the only member of the array object
-var times = [];
-times = timeQuery.list();
-var endTime = times.get(0).getEndTime();
-
-if (docDefectPMW == ""){
-    if (textTemplatePM != "") {
-        docDefectPMW = userFullName + ": " + textTemplatePM + " in: " + endTime;
-        } else {
-        docDefectPMW = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-        }
-    } else {
-    if (textTemplatePM != "") {
-    docDefectPMW = docDefectPMW + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
-    } else {
-    docDefectPMW = docDefectPMW + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-    }
-}
-
-x.data.processData.docDefectPMW = docDefectPMW;
-x.data.processData.textTemplatePM = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0ms2o3l</bpmn:incoming>
-      <bpmn:outgoing>Flow_19cf7vh</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:userTask id="Activity_1g0oh2b" name="بررسی نواقص مدارک حفاظت" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultP.json&#38;var=requestData" camunda:assignee="${starter}">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-var docDefectPMP = x.data.processData.docDefectPMP;
-var textTemplatePM = x.data.processData.textTemplatePM;
-
-//Retrieve the assignee query of the currnet task instance
-var query = task
-  .getProcessEngineServices()
-  .getIdentityService()
-  .createUserQuery()
-  .userIdIn(task.assignee);
-
-//Retrieve the only member of the array object
-var users = [];
-users = query.list();
-var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
-
-// Get the task ID
-var taskId = task.execution.getVariable("taskId");
-
-//Retrieve the time query of the currnet task instance
-var timeQuery = task
-.getProcessEngineServices()
-.getHistoryService()
-.createHistoricTaskInstanceQuery()
-.taskId(taskId);
-
-//Retrieve the only member of the array object
-var times = [];
-times = timeQuery.list();
-var endTime = times.get(0).getEndTime();
-
-if (docDefectPMP == ""){
-    if (textTemplatePM != "") {
-        docDefectPMP = userFullName + ": " + textTemplatePM + " in: " + endTime;
-        } else {
-        docDefectPMP = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-        }
-    } else {
-    if (textTemplatePM != "") {
-    docDefectPMP = docDefectPMP + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
-    } else {
-    docDefectPMP = docDefectPMP + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
-    }
-}
-
-x.data.processData.docDefectPMP = docDefectPMP;
-x.data.processData.textTemplatePM = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_124do41</bpmn:incoming>
-      <bpmn:outgoing>Flow_174u93m</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:startEvent id="Event_1xray2b" camunda:initiator="starter">
-      <bpmn:outgoing>Flow_1itfjzl</bpmn:outgoing>
-    </bpmn:startEvent>
     <bpmn:intermediateCatchEvent id="Event_1v3lozg">
       <bpmn:incoming>Flow_0amzdvw</bpmn:incoming>
       <bpmn:outgoing>Flow_1qd13pr</bpmn:outgoing>
@@ -1327,18 +1152,6 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       <bpmn:incoming>Flow_06ezur2</bpmn:incoming>
       <bpmn:outgoing>Flow_051h2px</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_1mqde4m" name="ثبت در سیستم" camunda:formKey="embedded:/forms/formio.html?deployment=RequestForm.json&#38;var=requestData" camunda:assignee="${starter}" camunda:candidateGroups="engineeringPlanning">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="javascript">execution.setVariable("checkWeld",true);
-execution.setVariable("checkMechanic",true);
-execution.setVariable("checkProtection",true);
-execution.setVariable("procedureCompleted", 0);</camunda:script>
-        </camunda:executionListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1itfjzl</bpmn:incoming>
-      <bpmn:outgoing>Flow_08ybu9r</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_1lp4j2g">
       <bpmn:incoming>Flow_03aj9xq</bpmn:incoming>
       <bpmn:incoming>Flow_1gjh5ay</bpmn:incoming>
@@ -1579,11 +1392,8 @@ execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:sc
         </camunda:executionListener>
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1itfjzl" sourceRef="Event_1xray2b" targetRef="Activity_1mqde4m">
-      <bpmn:extensionElements />
-    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1qd13pr" sourceRef="Event_1v3lozg" targetRef="Gateway_07k7o54" />
-    <bpmn:sequenceFlow id="Flow_1ut9nu2" sourceRef="Event_1d9r9n1" targetRef="Activity_002z6fl" />
+    <bpmn:sequenceFlow id="Flow_1ut9nu2" sourceRef="Event_1d9r9n1" targetRef="Gateway_1nmk0tu" />
     <bpmn:sequenceFlow id="Flow_1nzpwb1" sourceRef="Event_1wgry1h" targetRef="Gateway_04j9n87" />
     <bpmn:sequenceFlow id="Flow_1bu0j4c" name="بازرسی" sourceRef="Gateway_1wu6ct4" targetRef="Activity_0wfxikh">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${requestData.prop('data').prop('processData').prop('result2').value() == "inspection"}</bpmn:conditionExpression>
@@ -1765,7 +1575,6 @@ execution.setVariable("protectionPM",false);</camunda:script>
     <bpmn:sequenceFlow id="Flow_1m3hp5d" sourceRef="Gateway_0k9lvl1" targetRef="Gateway_0cjv7gx">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${requestData.prop('data').prop('processData').prop('result').value() == "revise"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0dbe9fh" sourceRef="Activity_002z6fl" targetRef="Gateway_1nmk0tu" />
     <bpmn:sequenceFlow id="Flow_12v5ill" sourceRef="Gateway_1c4i2aj" targetRef="Gateway_1jytfch" />
     <bpmn:sequenceFlow id="Flow_19b3ly4" sourceRef="Gateway_1lp4j2g" targetRef="Gateway_1jytfch" />
     <bpmn:sequenceFlow id="Flow_0inm2im" sourceRef="Gateway_0punf00" targetRef="Gateway_1jytfch" />
@@ -1780,189 +1589,17 @@ execution.setVariable("protectionPM",false);</camunda:script>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0kpgjby" sourceRef="Gateway_1jytfch" targetRef="Activity_117uf4g" />
     <bpmn:exclusiveGateway id="Gateway_1nmk0tu">
-      <bpmn:incoming>Flow_0dbe9fh</bpmn:incoming>
       <bpmn:incoming>Flow_01ovbm6</bpmn:incoming>
+      <bpmn:incoming>Flow_1ut9nu2</bpmn:incoming>
       <bpmn:outgoing>Flow_06hbe2u</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_002z6fl" name="بررسی برنامه ریزی مهندسی و ابلاغ کار" camunda:formKey="embedded:/forms/formio.html?deployment=DesignateWorkPM.json&#38;var=requestData" camunda:assignee="${starter}">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-
-// Transfering WorkFlowfiles to PM column
-var filesWFPM = x.data.processData.filesWFPM;
-var filesTemp = x.data.processData.newFilesWF;
-
-// Get the length of the existing "filesWFPM" object
-var filesWFPMLength = Object.keys(filesWFPM).length;
-
-// Loop through the filesTemp and add them to the "filesWFPM" object
-filesTemp.forEach(function(newFile, index) {
-  // Use the next available index for each new file
-  if (newFile &amp;&amp; Object.keys(newFile).length &gt; 0) {
-    var newIndex = filesWFPMLength + index;
-    filesWFPM[newIndex] = newFile;
-  }
-});
-
-x.data.processData.filesWFPM = filesWFPM;
-x.data.processData.newFilesWF = {};
-
-var disabledText = x.data.processData.disabledTextPM;
-var textTemplate = x.data.processData.textTemplateWF;
-var query = task
-  .getProcessEngineServices()
-  .getIdentityService()
-  .createUserQuery()
-  .userIdIn(task.assignee);
-var users = [];
-users = query.list();
-
-task.execution.setVariable(
-  "guFullName",
-  users.get(0).getFirstName() + " " + users.get(0).getLastName()
-);
-if (textTemplate != "") {
-  disabledText = disabledText + "&lt;br&gt;" + guFullName + ": " + textTemplate;
-} else {
-  disabledText = disabledText + "&lt;br&gt;" + guFullName + ": " + "(بدون کامنت)";
-}
-
-x.data.processData.disabledTextPM = disabledText;
-x.data.processData.textTemplateWF = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-        <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-var ww = JSON.parse(w);
-var mm = JSON.parse(m);
-var pp = JSON.parse(p);
-
-// Transfering comments
-x.data.processData.docDefectPM = 
-"گردش کار جوش &lt;br&gt;" + ww.data.processData.docDefectPMW + 
-"&lt;br&gt;گردش کار مکانیک &lt;br&gt;" + mm.data.processData.docDefectPMM + 
-"&lt;br&gt;گردش کار حفاظت &lt;br&gt;" + pp.data.processData.docDefectPMP;
-
-// Transfering comments
-x.data.processData.disabledTextW = ww.data.processData.disabledTextW;
-x.data.processData.disabledTextM = mm.data.processData.disabledTextM;
-x.data.processData.disabledTextP = pp.data.processData.disabledTextP;
-
-// Transfering dastoorFiles
-x.data.processData.dastoorFilesW = ww.data.processData.dastoorFilesW;
-x.data.processData.dastoorFilesM = mm.data.processData.dastoorFilesM;
-x.data.processData.dastoorFilesP = pp.data.processData.dastoorFilesP;
-
-execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));
-execution.setVariable("w", org.camunda.spin.Spin.JSON(ww));
-execution.setVariable("m", org.camunda.spin.Spin.JSON(mm));
-execution.setVariable("p", org.camunda.spin.Spin.JSON(pp));</camunda:script>
-        </camunda:executionListener>
-        <camunda:taskListener event="create">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-x.data.processData.textTemplateWF = "";
-x.data.processData.disabledTextPM = "";
-x.data.processData.disabledTextInspection = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1ut9nu2</bpmn:incoming>
-      <bpmn:outgoing>Flow_0dbe9fh</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_1c4i2aj">
       <bpmn:incoming>Flow_0j0t6f5</bpmn:incoming>
       <bpmn:incoming>Flow_0t2ivkc</bpmn:incoming>
       <bpmn:incoming>Flow_1yv5vlm</bpmn:incoming>
       <bpmn:outgoing>Flow_12v5ill</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_1mwmk3r" name="بررسی برنامه ریزی مهندسی و اتمام کار" camunda:formKey="embedded:/forms/formio.html?deployment=CompleteWorkPlaning.json&#38;var=requestData" camunda:assignee="${starter}">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-
-// Transfering WorkFlowfiles to PM column
-var filesWFPM = x.data.processData.filesWFPM;
-var filesTemp = x.data.processData.newFilesWF;
-
-// Get the length of the existing "filesWFPM" object
-var filesWFPMLength = Object.keys(filesWFPM).length;
-
-// Loop through the filesTemp and add them to the "filesWFPM" object
-filesTemp.forEach(function(newFile, index) {
-  // Use the next available index for each new file
-  if (newFile &amp;&amp; Object.keys(newFile).length &gt; 0) {
-    var newIndex = filesWFPMLength + index;
-    filesWFPM[newIndex] = newFile;
-  }
-});
-
-x.data.processData.filesWFPM = filesWFPM;
-x.data.processData.newFilesWF = {};
-
-var disabledText = x.data.processData.disabledTextPM;
-var textTemplate = x.data.processData.textTemplateWF;
-var query = task
-  .getProcessEngineServices()
-  .getIdentityService()
-  .createUserQuery()
-  .userIdIn(task.assignee);
-var users = [];
-users = query.list();
-
-task.execution.setVariable(
-  "guFullName",
-  users.get(0).getFirstName() + " " + users.get(0).getLastName()
-);
-if (textTemplate != "") {
-  disabledText = disabledText + "&lt;br&gt;" + guFullName + ": " + textTemplate;
-} else {
-  disabledText = disabledText + "&lt;br&gt;" + guFullName + ": " + "(بدون کامنت)";
-}
-
-x.data.processData.disabledTextPM = disabledText;
-x.data.processData.textTemplateWF = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-        <camunda:executionListener event="start">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-var ww = JSON.parse(w);
-var mm = JSON.parse(m);
-var pp = JSON.parse(p);
-
-// Transfering comments
-x.data.processData.docDefectPM = 
-"گردش کار جوش &lt;br&gt;" + ww.data.processData.docDefectPMW + 
-"&lt;br&gt;گردش کار مکانیک &lt;br&gt;" + mm.data.processData.docDefectPMM + 
-"&lt;br&gt;گردش کار حفاظت &lt;br&gt;" + pp.data.processData.docDefectPMP;
-
-// Transfering comments
-x.data.processData.disabledTextW = ww.data.processData.disabledTextW;
-x.data.processData.disabledTextM = mm.data.processData.disabledTextM;
-x.data.processData.disabledTextP = pp.data.processData.disabledTextP;
-
-// Transfering dastoorFiles
-x.data.processData.dastoorFilesW = ww.data.processData.dastoorFilesW;
-x.data.processData.dastoorFilesM = mm.data.processData.dastoorFilesM;
-x.data.processData.dastoorFilesP = pp.data.processData.dastoorFilesP;
-
-execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));
-execution.setVariable("w", org.camunda.spin.Spin.JSON(ww));
-execution.setVariable("m", org.camunda.spin.Spin.JSON(mm));
-execution.setVariable("p", org.camunda.spin.Spin.JSON(pp));</camunda:script>
-        </camunda:executionListener>
-        <camunda:taskListener event="create">
-          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
-x.data.processData.textTemplateWF = "";
-x.data.processData.disabledTextPM = "";
-x.data.processData.disabledTextInspection = "";
-task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_05jyfbl</bpmn:incoming>
-      <bpmn:outgoing>Flow_00gk9hf</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:userTask id="Activity_117uf4g" name="بررسی برنامه ریزی تعمیرات و اتمام کار" camunda:formKey="embedded:/forms/formio.html?deployment=DesignateWorkPM.json&#38;var=requestData" camunda:assignee="${starter}">
+    <bpmn:userTask id="Activity_117uf4g" name="بررسی برنامه ریزی تعمیرات و اتمام کار" camunda:formKey="embedded:/forms/formio.html?deployment=CompleteWorkMaintenance.json&#38;var=requestData" camunda:assignee="${starter}">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
@@ -2048,25 +1685,210 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       <bpmn:incoming>Flow_0kpgjby</bpmn:incoming>
       <bpmn:outgoing>Flow_05jyfbl</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1dgy8j9">
-      <bpmn:incoming>Flow_00gk9hf</bpmn:incoming>
-      <bpmn:outgoing>Flow_0zyncqx</bpmn:outgoing>
-      <bpmn:outgoing>Flow_01ovbm6</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_05jyfbl" sourceRef="Activity_117uf4g" targetRef="Activity_1mwmk3r" />
-    <bpmn:sequenceFlow id="Flow_00gk9hf" sourceRef="Activity_1mwmk3r" targetRef="Gateway_1dgy8j9" />
-    <bpmn:sequenceFlow id="Flow_0zyncqx" sourceRef="Gateway_1dgy8j9" targetRef="Event_1jia0lo">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${requestData.prop('data').prop('processData').prop('result').value() == "accept"}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:endEvent id="Event_1jia0lo">
-      <bpmn:incoming>Flow_0zyncqx</bpmn:incoming>
-    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_05jyfbl" sourceRef="Activity_117uf4g" targetRef="Gateway_1dgy8j9" />
     <bpmn:exclusiveGateway id="Gateway_1jytfch">
       <bpmn:incoming>Flow_0inm2im</bpmn:incoming>
       <bpmn:incoming>Flow_12v5ill</bpmn:incoming>
       <bpmn:incoming>Flow_19b3ly4</bpmn:incoming>
       <bpmn:outgoing>Flow_0kpgjby</bpmn:outgoing>
     </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_1kmhgnj" name="بررسی نواقص مدارک مکانیک" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultM.json&#38;var=requestData" camunda:assignee="${starter}">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
+var docDefectPMM = x.data.processData.docDefectPMM;
+var textTemplatePM = x.data.processData.textTemplatePM;
+
+//Retrieve the assignee query of the currnet task instance
+var query = task
+  .getProcessEngineServices()
+  .getIdentityService()
+  .createUserQuery()
+  .userIdIn(task.assignee);
+
+//Retrieve the only member of the array object
+var users = [];
+users = query.list();
+var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
+
+// Get the task ID
+var taskId = task.execution.getVariable("taskId");
+
+//Retrieve the time query of the currnet task instance
+var timeQuery = task
+.getProcessEngineServices()
+.getHistoryService()
+.createHistoricTaskInstanceQuery()
+.taskId(taskId);
+
+//Retrieve the only member of the array object
+var times = [];
+times = timeQuery.list();
+var endTime = times.get(0).getEndTime();
+
+if (docDefectPMM == ""){
+    if (textTemplatePM != "") {
+        docDefectPMM = userFullName + ": " + textTemplatePM + " in: " + endTime;
+        } else {
+        docDefectPMM = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+        }
+    } else {
+    if (textTemplatePM != "") {
+    docDefectPMM = docDefectPMM + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
+    } else {
+    docDefectPMM = docDefectPMM + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+    }
+}
+
+x.data.processData.docDefectPMM = docDefectPMM;
+x.data.processData.textTemplatePM = "";
+task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0eacik5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0w9h8sh</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Activity_1gwcctk" name="بررسی نواقص مدارک جوش" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultW.json&#38;var=requestData" camunda:assignee="${starter}">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
+var docDefectPMW = x.data.processData.docDefectPMW;
+var textTemplatePM = x.data.processData.textTemplatePM;
+
+//Retrieve the assignee query of the currnet task instance
+var query = task
+  .getProcessEngineServices()
+  .getIdentityService()
+  .createUserQuery()
+  .userIdIn(task.assignee);
+
+//Retrieve the only member of the array object
+var users = [];
+users = query.list();
+var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
+
+// Get the task ID
+var taskId = task.execution.getVariable("taskId");
+
+//Retrieve the time query of the currnet task instance
+var timeQuery = task
+.getProcessEngineServices()
+.getHistoryService()
+.createHistoricTaskInstanceQuery()
+.taskId(taskId);
+
+//Retrieve the only member of the array object
+var times = [];
+times = timeQuery.list();
+var endTime = times.get(0).getEndTime();
+
+if (docDefectPMW == ""){
+    if (textTemplatePM != "") {
+        docDefectPMW = userFullName + ": " + textTemplatePM + " in: " + endTime;
+        } else {
+        docDefectPMW = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+        }
+    } else {
+    if (textTemplatePM != "") {
+    docDefectPMW = docDefectPMW + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
+    } else {
+    docDefectPMW = docDefectPMW + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+    }
+}
+
+x.data.processData.docDefectPMW = docDefectPMW;
+x.data.processData.textTemplatePM = "";
+task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ms2o3l</bpmn:incoming>
+      <bpmn:outgoing>Flow_19cf7vh</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Activity_1g0oh2b" name="بررسی نواقص مدارک حفاظت" camunda:formKey="embedded:/forms/formio.html?deployment=CheckResultP.json&#38;var=requestData" camunda:assignee="${starter}">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">var x = JSON.parse(requestData);
+var docDefectPMP = x.data.processData.docDefectPMP;
+var textTemplatePM = x.data.processData.textTemplatePM;
+
+//Retrieve the assignee query of the currnet task instance
+var query = task
+  .getProcessEngineServices()
+  .getIdentityService()
+  .createUserQuery()
+  .userIdIn(task.assignee);
+
+//Retrieve the only member of the array object
+var users = [];
+users = query.list();
+var userFullName = users.get(0).getFirstName() + " " + users.get(0).getLastName();
+
+// Get the task ID
+var taskId = task.execution.getVariable("taskId");
+
+//Retrieve the time query of the currnet task instance
+var timeQuery = task
+.getProcessEngineServices()
+.getHistoryService()
+.createHistoricTaskInstanceQuery()
+.taskId(taskId);
+
+//Retrieve the only member of the array object
+var times = [];
+times = timeQuery.list();
+var endTime = times.get(0).getEndTime();
+
+if (docDefectPMP == ""){
+    if (textTemplatePM != "") {
+        docDefectPMP = userFullName + ": " + textTemplatePM + " in: " + endTime;
+        } else {
+        docDefectPMP = userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+        }
+    } else {
+    if (textTemplatePM != "") {
+    docDefectPMP = docDefectPMP + "&lt;br&gt;" + userFullName + ": " + textTemplatePM + " in: " + endTime;
+    } else {
+    docDefectPMP = docDefectPMP + "&lt;br&gt;" + userFullName + ": " + "(بدون کامنت)" + " in: " + endTime;
+    }
+}
+
+x.data.processData.docDefectPMP = docDefectPMP;
+x.data.processData.textTemplatePM = "";
+task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_124do41</bpmn:incoming>
+      <bpmn:outgoing>Flow_174u93m</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="Event_1xray2b" camunda:initiator="starter">
+      <bpmn:outgoing>Flow_1itfjzl</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Activity_1mqde4m" name="ثبت در سیستم" camunda:formKey="embedded:/forms/formio.html?deployment=RequestForm.json&#38;var=requestData" camunda:assignee="${starter}" camunda:candidateGroups="engineeringPlanning">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="end">
+          <camunda:script scriptFormat="javascript">execution.setVariable("checkWeld",true);
+execution.setVariable("checkMechanic",true);
+execution.setVariable("checkProtection",true);
+execution.setVariable("procedureCompleted", 0);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1itfjzl</bpmn:incoming>
+      <bpmn:outgoing>Flow_08ybu9r</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1itfjzl" sourceRef="Event_1xray2b" targetRef="Activity_1mqde4m">
+      <bpmn:extensionElements />
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_1dgy8j9">
+      <bpmn:incoming>Flow_05jyfbl</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zyncqx</bpmn:outgoing>
+      <bpmn:outgoing>Flow_01ovbm6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0zyncqx" sourceRef="Gateway_1dgy8j9" targetRef="Event_1jia0lo">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${requestData.prop('data').prop('processData').prop('result').value() == "accept"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_1jia0lo">
+      <bpmn:incoming>Flow_0zyncqx</bpmn:incoming>
+    </bpmn:endEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0hbol3d">
@@ -2078,16 +1900,12 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         <dc:Bounds x="190" y="80" width="4508" height="580" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_13uu65h_di" bpmnElement="Lane_13uu65h_ePlanning" isHorizontal="true" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
-        <dc:Bounds x="190" y="1615" width="4508" height="395" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_1ja24ae_di" bpmnElement="Lane_1ja24ae_inspection" isHorizontal="true" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
-        <dc:Bounds x="190" y="2010" width="4508" height="1250" />
+        <dc:Bounds x="190" y="1935" width="4508" height="1325" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_18egfit_di" bpmnElement="Lane_18egfit" isHorizontal="true" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
-        <dc:Bounds x="190" y="660" width="4508" height="955" />
+        <dc:Bounds x="190" y="660" width="4508" height="1275" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0i1kuth_di" bpmnElement="Gateway_0i1kuth" isMarkerVisible="true" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
@@ -2143,21 +1961,6 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       <bpmndi:BPMNShape id="BPMNShape_1ttnymi" bpmnElement="Activity_03xy3td" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
         <dc:Bounds x="1220" y="2680" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0lkso7p" bpmnElement="Activity_1kmhgnj" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
-        <dc:Bounds x="930" y="1780" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0tu5snx_di" bpmnElement="Activity_1gwcctk" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
-        <dc:Bounds x="830" y="1890" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1ushbci" bpmnElement="Activity_1g0oh2b" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
-        <dc:Bounds x="1040" y="1660" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1xray2b_di" bpmnElement="Event_1xray2b" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
-        <dc:Bounds x="362" y="1682" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0zqdrh9_di" bpmnElement="Event_1v3lozg" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="1792" y="2342" width="36" height="36" />
@@ -2322,9 +2125,6 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       <bpmndi:BPMNShape id="Gateway_05k4sx7_di" bpmnElement="Gateway_05k4sx7" isMarkerVisible="true" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
         <dc:Bounds x="2755" y="1395" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_164yrq8_di" bpmnElement="Activity_1mqde4m" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
-        <dc:Bounds x="330" y="1780" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1lp4j2g_di" bpmnElement="Gateway_1lp4j2g" isMarkerVisible="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="4345" y="365" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -2355,29 +2155,39 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       <bpmndi:BPMNShape id="Gateway_1nmk0tu_di" bpmnElement="Gateway_1nmk0tu" isMarkerVisible="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="1925" y="1795" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0q9wayl" bpmnElement="Activity_002z6fl" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
-        <dc:Bounds x="1900" y="1890" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_04aq4ln" bpmnElement="Gateway_1c4i2aj" isMarkerVisible="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="4295" y="2205" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1rhiskc" bpmnElement="Activity_1mwmk3r" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
-        <dc:Bounds x="4200" y="1660" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0dics4o" bpmnElement="Activity_117uf4g" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="4200" y="1470" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1dgy8j9_di" bpmnElement="Gateway_1dgy8j9" isMarkerVisible="true" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
-        <dc:Bounds x="4225" y="1795" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1jia0lo_di" bpmnElement="Event_1jia0lo" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
-        <dc:Bounds x="4232" y="1892" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1jytfch_di" bpmnElement="Gateway_1jytfch" isMarkerVisible="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <dc:Bounds x="4425" y="1485" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0lkso7p" bpmnElement="Activity_1kmhgnj" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="930" y="1230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tu5snx_di" bpmnElement="Activity_1gwcctk" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="830" y="1340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1ushbci" bpmnElement="Activity_1g0oh2b" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1040" y="1110" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xray2b_di" bpmnElement="Event_1xray2b" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
+        <dc:Bounds x="362" y="892" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_164yrq8_di" bpmnElement="Activity_1mqde4m" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
+        <dc:Bounds x="330" y="990" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1dgy8j9_di" bpmnElement="Gateway_1dgy8j9" isMarkerVisible="true" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
+        <dc:Bounds x="4225" y="1655" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1jia0lo_di" bpmnElement="Event_1jia0lo" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
+        <dc:Bounds x="4082" y="1662" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0rxfpj8_di" bpmnElement="Flow_0rxfpj8" bioc:stroke="#205022" color:border-color="#205022">
         <di:waypoint x="800" y="2100" />
@@ -2393,9 +2203,9 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ms2o3l_di" bpmnElement="Flow_0ms2o3l" bioc:stroke="#205022" color:border-color="#205022">
         <di:waypoint x="880" y="2075" />
-        <di:waypoint x="880" y="1970" />
+        <di:waypoint x="880" y="1420" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="852" y="2060" width="16" height="14" />
+          <dc:Bounds x="852" y="2018" width="16" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1utx4yq_di" bpmnElement="Flow_1utx4yq">
@@ -2407,8 +2217,8 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_19cf7vh_di" bpmnElement="Flow_19cf7vh" bioc:stroke="#205022" color:border-color="#205022">
-        <di:waypoint x="830" y="1930" />
-        <di:waypoint x="660" y="1930" />
+        <di:waypoint x="830" y="1380" />
+        <di:waypoint x="660" y="1380" />
         <di:waypoint x="660" y="2080" />
         <di:waypoint x="700" y="2080" />
       </bpmndi:BPMNEdge>
@@ -2423,8 +2233,8 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         <di:waypoint x="880" y="2360" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_174u93m_di" bpmnElement="Flow_174u93m" bioc:stroke="#831311" color:border-color="#831311">
-        <di:waypoint x="1040" y="1700" />
-        <di:waypoint x="620" y="1700" />
+        <di:waypoint x="1040" y="1150" />
+        <di:waypoint x="620" y="1150" />
         <di:waypoint x="620" y="2340" />
         <di:waypoint x="880" y="2340" />
       </bpmndi:BPMNEdge>
@@ -2449,9 +2259,9 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_124do41_di" bpmnElement="Flow_124do41" bioc:stroke="#831311" color:border-color="#831311">
         <di:waypoint x="1090" y="2335" />
-        <di:waypoint x="1090" y="1740" />
+        <di:waypoint x="1090" y="1190" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1102" y="2285" width="16" height="14" />
+          <dc:Bounds x="1102" y="2245" width="16" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1jf00j4_di" bpmnElement="Flow_1jf00j4">
@@ -2499,7 +2309,7 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_08ybu9r_di" bpmnElement="Flow_08ybu9r" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
-        <di:waypoint x="380" y="1860" />
+        <di:waypoint x="380" y="1070" />
         <di:waypoint x="380" y="2230" />
         <di:waypoint x="475" y="2230" />
       </bpmndi:BPMNEdge>
@@ -2521,20 +2331,16 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0eacik5_di" bpmnElement="Flow_0eacik5" bioc:stroke="#0d4372" color:border-color="#0d4372">
         <di:waypoint x="980" y="2205" />
-        <di:waypoint x="980" y="1860" />
+        <di:waypoint x="980" y="1310" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="952" y="2166" width="16" height="14" />
+          <dc:Bounds x="952" y="2115" width="16" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0w9h8sh_di" bpmnElement="Flow_0w9h8sh" bioc:stroke="#0d4372" color:border-color="#0d4372">
-        <di:waypoint x="930" y="1820" />
-        <di:waypoint x="640" y="1820" />
+        <di:waypoint x="930" y="1270" />
+        <di:waypoint x="640" y="1270" />
         <di:waypoint x="640" y="2210" />
         <di:waypoint x="790" y="2210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1itfjzl_di" bpmnElement="Flow_1itfjzl" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
-        <di:waypoint x="380" y="1718" />
-        <di:waypoint x="380" y="1780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1qd13pr_di" bpmnElement="Flow_1qd13pr" bioc:stroke="#0d4372" color:border-color="#0d4372">
         <di:waypoint x="1810" y="2342" />
@@ -2543,7 +2349,7 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ut9nu2_di" bpmnElement="Flow_1ut9nu2" bioc:stroke="#205022" color:border-color="#205022">
         <di:waypoint x="1950" y="2342" />
-        <di:waypoint x="1950" y="1970" />
+        <di:waypoint x="1950" y="1845" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1nzpwb1_di" bpmnElement="Flow_1nzpwb1" bioc:stroke="#831311" color:border-color="#831311">
         <di:waypoint x="1650" y="2342" />
@@ -2934,10 +2740,6 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         <di:waypoint x="3580" y="323" />
         <di:waypoint x="3580" y="298" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0dbe9fh_di" bpmnElement="Flow_0dbe9fh" bioc:stroke="#205022" color:border-color="#205022">
-        <di:waypoint x="1950" y="1890" />
-        <di:waypoint x="1950" y="1845" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_12v5ill_di" bpmnElement="Flow_12v5ill" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
         <di:waypoint x="4345" y="2230" />
         <di:waypoint x="4450" y="2230" />
@@ -2960,7 +2762,8 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
         <di:waypoint x="1950" y="1550" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_01ovbm6_di" bpmnElement="Flow_01ovbm6" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
-        <di:waypoint x="4225" y="1820" />
+        <di:waypoint x="4250" y="1705" />
+        <di:waypoint x="4250" y="1820" />
         <di:waypoint x="1975" y="1820" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0kpgjby_di" bpmnElement="Flow_0kpgjby" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
@@ -2969,15 +2772,15 @@ task.execution.setVariable("requestData", org.camunda.spin.Spin.JSON(x));</camun
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_05jyfbl_di" bpmnElement="Flow_05jyfbl" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
         <di:waypoint x="4250" y="1550" />
-        <di:waypoint x="4250" y="1660" />
+        <di:waypoint x="4250" y="1655" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_00gk9hf_di" bpmnElement="Flow_00gk9hf" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
-        <di:waypoint x="4250" y="1740" />
-        <di:waypoint x="4250" y="1795" />
+      <bpmndi:BPMNEdge id="Flow_1itfjzl_di" bpmnElement="Flow_1itfjzl" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
+        <di:waypoint x="380" y="928" />
+        <di:waypoint x="380" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zyncqx_di" bpmnElement="Flow_0zyncqx" bioc:stroke="#6b3c00" color:border-color="#6b3c00">
-        <di:waypoint x="4250" y="1845" />
-        <di:waypoint x="4250" y="1892" />
+        <di:waypoint x="4225" y="1680" />
+        <di:waypoint x="4118" y="1680" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
